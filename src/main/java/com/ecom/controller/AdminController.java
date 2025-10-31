@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,8 +25,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ecom.model.Category;
 import com.ecom.model.Product;
+import com.ecom.model.UserDtls;
+import com.ecom.service.CartService;
 import com.ecom.service.CategoryService;
 import com.ecom.service.ProductService;
+import com.ecom.service.UserService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -38,10 +42,31 @@ public class AdminController {
 
 	@Autowired
 	private ProductService productService;
+	
+	@Autowired
+	private UserService userService;
+	
+	@Autowired
+	private CartService cartService;
 
 	@GetMapping("/")
 	public String index() {
 		return "admin/index";
+	}
+	
+	@ModelAttribute
+	public void getUserDeatils(Principal p,Model m) {
+		
+		if(!ObjectUtils.isEmpty(p)) {
+			String email = p.getName();
+			UserDtls user = userService.getUserByEmail(email);
+			m.addAttribute("user", user);
+			 m.addAttribute("countCart",cartService.getCountcart(user.getId()));;
+
+		}
+		m.addAttribute("category", categoryService.getAllActiveCategory());
+
+		
 	}
 
 	@GetMapping("/loadAddProduct")
@@ -141,23 +166,108 @@ public class AdminController {
 	@PostMapping("/saveProduct")
 	public String saveProduct(@ModelAttribute Product product, @RequestParam("file") MultipartFile image,
 			HttpSession session) throws Exception {
-		String imageName = image.isEmpty() ? "default.jpg" : image.getOriginalFilename();
 
+		String imageName = image.isEmpty() ? "default.jpg" : image.getOriginalFilename();
+		product.setDiscount(0);
+		product.setDiscountPrice(product.getPrice());
 		product.setImage(imageName);
-		
+
 		Product saveProduct = productService.saveProduct(product);
 		if (!ObjectUtils.isEmpty(saveProduct)) {
-			
+
 			File saveFile = new ClassPathResource("static/img").getFile();
-			Path path = Paths.get(saveFile.getAbsolutePath()+File.separator+"product_img"+image.getOriginalFilename());
+			Path path = Paths
+					.get(saveFile.getAbsolutePath() + File.separator + "product_img/" + image.getOriginalFilename());
+			System.out.println(path);
 			Files.copy(image.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-			
+
 			session.setAttribute("successMsg", "Product add successfully");
-		
+
 		} else {
 			session.setAttribute("errorMsg", "internal server error");
 		}
 		return "redirect:/admin/loadAddProduct";
+	}
+
+	@GetMapping("/products")
+	public String loadViewProduct(Model m) {
+		List<Product> products = productService.getAllProduct();
+		m.addAttribute("products", products);
+		return "admin/products";
+
+	}
+
+	@GetMapping("/deleteProduct/{id}")
+	public String deleteProduct(@PathVariable int id, HttpSession session) {
+		Boolean deleteCategory = productService.deleteProductById(id);
+		if (deleteCategory) {
+			session.setAttribute("successMsg", "item deleted successfuly ");
+		} else {
+			session.setAttribute("errorMsg", "internal server error");
+		}
+		return "redirect:/admin/products";
+
+	}
+
+	@GetMapping("/editProduct/{id}")
+	public String editProduct(@PathVariable int id, Model m) {
+		Product product = productService.editProductById(id);
+
+		if (!ObjectUtils.isEmpty(product)) {
+
+			m.addAttribute("products", product);
+
+			List<Category> allCategory = categoryService.getAllCategory();
+
+			m.addAttribute("categories", allCategory);
+			m.addAttribute("product", product);
+		}
+
+		return "/admin/edit_product";
+
+	}
+
+	@PostMapping("/updateProduct")
+	public String updateProduct(@ModelAttribute Product p, @RequestParam("file") MultipartFile image,
+			HttpSession session) {
+
+		if (p.getDiscount() < 0 || p.getDiscount() > 100) {
+			session.setAttribute("errorMsg", "invalid discount");
+		} else {
+
+			Product product = productService.updateProduct(p, image);
+
+			if (!ObjectUtils.isEmpty(product)) {
+				session.setAttribute("successMsg", "product updated successfully");
+			} else {
+				session.setAttribute("errorMsg", "Something wrong on server");
+			}
+
+		}
+
+		return "redirect:/admin/editProduct/" + p.getId();
+
+	}
+	
+	@GetMapping("/users")
+	public String getAllUser(Model m) {
+		List<UserDtls> users = userService.getUsers("ROLE_USER");
+		m.addAttribute("users", users);
+		return "/admin/users";
+	}
+	
+	@GetMapping("/updateStatus")
+	public String updateUserAccountStatus(@RequestParam String status,int id,HttpSession session) {
+		System.out.println(status);
+		boolean userStatus = Boolean.parseBoolean(status);
+		Boolean statusChange = userService.updateAccountStatus(id,userStatus);
+		if(statusChange) {
+			session.setAttribute("successMsg", "status updated sucesstfully");
+		}
+		else {
+			session.setAttribute("errorMsg", "status updated failed");
+		}
+		return "redirect:/admin/users";
 	}
 
 }

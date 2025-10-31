@@ -1,0 +1,11 @@
+Hi {FULLNAME},</br>
+</br>
+You have requested to reset your password.
+</br>
+Click the link below to change your password: <br>
+Link: <a  href="{LINK}" style="color:blue;">Change my password</a> 
+</br>
+</br>
+
+Thanks,</br>
+Admin team.</br>

@@ -26,6 +26,12 @@ public class Product {
 	private int stock;
 
 	private String image;
+	
+	private int discount;
+	
+	private Double discountPrice;
+	
+	private boolean isActive;
 
 	public Integer getId() {
 		return id;
@@ -43,11 +49,11 @@ public class Product {
 		this.title = title;
 	}
 
-	public String getdescription() {
+	public String getDescription() {
 		return description;
 	}
 
-	public void setdescription(String description) {
+	public void setDescription(String description) {
 		this.description = description;
 	}
 
@@ -83,12 +89,29 @@ public class Product {
 		this.image = image;
 	}
 
-	@Override
-	public String toString() {
-		return "Product [id=" + id + ", title=" + title + ", describe=" + description + ", category=" + category
-				+ ", price=" + price + ", stock=" + stock + ", imageName=" + image + "]";
+	public int getDiscount() {
+		return discount;
 	}
-	
-	
 
+	public void setDiscount(int discount) {
+		this.discount = discount;
+	}
+
+	public Double getDiscountPrice() {
+		return discountPrice;
+	}
+
+	public void setDiscountPrice(Double discountPrice) {
+		this.discountPrice = discountPrice;
+	}
+
+	public Boolean getIsActive() {
+		return isActive;
+	}
+
+	public void setIsActive(Boolean isActive) {
+		this.isActive = isActive;
+	}
+
+	
 }

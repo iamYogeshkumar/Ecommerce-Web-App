@@ -18,7 +18,7 @@
 								<th:block th:text="${@commonServiceImpl.removeSession()}"></th:block>
 							</th:block>
 							<th:block th:if="${session.errorMsg}">
-								<p class="fw-bold text-danger">[[${session.errorMssg}]]</p>
+								<p class="fw-bold text-danger">[[${session.errorMsg}]]</p>
 								<th:block th:text="${@commonServiceImpl.removeSession()}"></th:block>
 							</th:block>
 						</div>
@@ -44,6 +44,23 @@
 									<label>Enter price</label> <input type="number" name="price"
 										class="form-control">
 								</div>
+								
+								<div class="mb-3">
+									<label>Status</label>
+									<div class="form-check">
+										<input class="form-check-input" type="radio" value="true"
+											name="isActive" id="flexRadioDefault1" checked> <label
+											class="form-check-label" for="flexRadioDefault1">
+											Active </label>
+									</div>
+									<div class="form-check">
+										<input class="form-check-input" type="radio" value="false"
+											name="isActive" id="flexRadioDefault2"> <label
+											class="form-check-label" for="flexRadioDefault2">
+											Inactive </label>
+									</div>
+								</div>
+								
 								<div class="row">
 									<div class="mb-3 col">
 										<label>Enter stock</label> <input type="number" name="stock"

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="www.thymeleaf.org"
+	th:replace="~{base::Layout(~{::section})}">
+<head>
+<meta charset="UTF-8">
+<title>Cart</title>
+</head>
+<body>
+	<section>
+		<div class="container-fluid mt-5 p-2">
+
+			<div class="card card-sh">
+				<div class="card-header text-center">
+					<p class="fs-4">Cart Page</p>
+					<th:block th:if="${session.successMsg}">
+						<p class="fw-bold text-success">[[${session.successMsg}]]</p>
+						<th:block th:text="${@commonServiceImpl.removeSession()}"></th:block>
+					</th:block>
+					<th:block th:if="${session.errorMsg}">
+						<p class="fw-bold text-danger">[[${session.errorMsg}]]</p>
+						<th:block th:text="${@commonServiceImpl.removeSession()}"></th:block>
+					</th:block>
+				</div>
+
+				<div class="card-body text-center">
+					<table class="table">
+						<thead>
+							<tr>
+								<th scope="col">S.no</th>
+								<th scope="col">Image</th>
+								<th scope="col">ProductName</th>
+								<th scope="col">Price</th>
+								<th scope="col">Quantity</th>
+								<th scope="col">Total Price</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="cart,c:${carts}" th:if="${cart.quantity}>0">
+								<th scope="row">[[${c.count}]]</th>
+								<td><img th:src="@{'/img/product_img/'+${cart.product.image}}"
+									width="50px" height="50px" alt="Product Image"></td>
+								<td>[[${cart.product.title}]]</td>
+								<td>&#8377; [[${cart.product.discountPrice}]]</td>
+								<td>[[${cart.quantity}]]  
+								 <a class="btn btn-primary btn-sm" th:href="@{'/user/addQuantity?cartId='+${cart.id}}"><i class="fa-solid fa-plus"></i></a>
+								 
+								 <a class="btn btn-danger btn-sm" th:href="@{'/user/decreaseQuantity?cartId='+${cart.id}}"><i class="fa-solid fa-minus"></i></a>
+								 
+								</td>
+								<td>&#8377; [[${cart.totalPrice}]]</td>
+							</tr>
+							<tr>
+							  <td colspan="4"></td>
+							   <th:block th:if="${orderAmt!=null && orderAmt >0.0} ">
+							  <td class="fw-bold">Total Amount is </td>
+							 
+							  <td class="text-danger fw-bold" >&#8377; [[${orderAmt}]]</td>
+							  </th:block>
+							</tr>
+							
+							
+						</tbody>
+					</table>
+					<th:block th:if="${orderAmt!=null && orderAmt >0}">
+                     <!-- <h2 class="text-center">Total Amount is &#8377; [[${orderAmt}]]</h2> -->
+                     <a href="#" class="btn btn-warning">Proceed to buy</a> 
+                     </th:block>
+                     <th:block th:unless="${orderAmt!=null &&  orderAmt>0}">
+                     <h2 class="text-center"> Your Cart is empty</h2>
+                     </th:block>
+				</div>
+
+			</div>
+		</div>
+
+
+	</section>
+</body>
+</html>

@@ -27,7 +27,6 @@ public class CategoryServiceImpl implements CategoryService {
 
 	@Override
 	public List<Category> getAllCategory() {
-		 
 		return repo.findAll();
 	}
 
@@ -51,6 +50,12 @@ public class CategoryServiceImpl implements CategoryService {
 	public Category getCategoryById(int id) {
 		Category category = repo.findById(id).orElse(null);
 		return category;
+	}
+
+	@Override
+	public List<Category> getAllActiveCategory() {
+		List<Category> categories = repo.findByisActiveTrue();
+		return categories;
 	}
 
 }
