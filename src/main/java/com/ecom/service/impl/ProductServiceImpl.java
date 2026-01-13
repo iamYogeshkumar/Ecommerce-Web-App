@@ -9,6 +9,9 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,9 +33,9 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public List<Product> getAllProduct() {
-
-		return repo.findAll();
+	public Page<Product> getAllProduct(Integer pageNo,Integer pageSize) {
+        PageRequest of = PageRequest.of(pageNo, pageSize);
+		return repo.findAll(of);
 	}
 
 	@Override
@@ -99,6 +102,44 @@ public class ProductServiceImpl implements ProductService {
 			return products;
 		}
 		return null;
+	}
+
+	@Override
+	public Page<Product> searchProductPagination(String ch, Integer pageNo, Integer pageSize) {
+		PageRequest of = PageRequest.of(pageNo, pageSize);
+		return 	repo.findByTitleContainingIgnoreCaseOrCategoryContainingIgnoreCase(ch, ch,of);
+		
+	}
+
+	@Override
+	public List<Product> searchProduct(String ch) {
+		
+		return repo.findByTitleContainingIgnoreCaseOrCategoryContainingIgnoreCase(ch, ch);
+		 
+	}
+
+	@Override
+	public Page<Product> getAllActiveProductPagination(int pageNo, Integer pageSize,String category) {
+		Pageable of = PageRequest.of(pageNo, pageSize);
+		Page<Product> byIsActiveTrue=null;
+		
+		if(ObjectUtils.isEmpty(category)) {
+			 byIsActiveTrue = repo.findByIsActiveTrue(of);
+		}else {
+			byIsActiveTrue=repo.findByCategoryAndIsActiveTrue(category,of);
+		}
+		
+		return byIsActiveTrue;
+	}
+
+	@Override
+	public Page<Product> searchAllActiveProductPagination(Integer pageNo, Integer pageSize, String category,String ch) {
+		PageRequest of = PageRequest.of(pageNo, pageSize);
+		Page<Product> page=null;
+		 
+		page=repo.findByIsActiveTrueAndTitleContainingIgnoreCaseOrCategoryContainingIgnoreCase(ch,category,of);
+		
+		return  page;
 	}
 
 }

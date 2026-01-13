@@ -51,7 +51,7 @@ public class CartServiceImpl implements CartService {
 	@Override
 	public List<Cart> getCartByUser(Integer userId) {
 		 List<Cart> carts = cartRepo.findByUserId(userId);
-		double sum=0.0;
+		//double sum=0.0;
 		 for(Cart c:carts) {
 			 Double totalPrice=0.0;
 			 Integer quantity = c.getQuantity();

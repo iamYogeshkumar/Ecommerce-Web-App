@@ -1,0 +1,9 @@
+Thank you your Order Placed Successful. <br><br>
+
+Product Details: {productname} <br>
+Name   :   {name}  <br>
+Category : {category}  <br>
+Quantity : {quantity}  <br>
+Price    : {price}      <br>
+Payment  : {paymentType} <br>
+

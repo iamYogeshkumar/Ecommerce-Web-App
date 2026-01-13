@@ -2,6 +2,8 @@ package com.ecom.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+
 import com.ecom.model.Category;
 
 public interface CategoryService {
@@ -9,6 +11,8 @@ public interface CategoryService {
 	public Category saveCategory(Category c);
 	
 	public List<Category> getAllCategory();
+	
+	public Page<Category> getAllCategoryPagination(Integer pageNo,Integer pageSize);
 	
 	public boolean existCategory(String name);
 	

@@ -24,7 +24,7 @@ public class UserDtls {
 	private String profileImage;
 	private String role;
 	private boolean isEnable;
-	private Boolean accountNonLocked;
+	private boolean accountNonLocked;
 	private int failedAttempt;
 	private Date locktime;
 	private String resetToken;
@@ -125,11 +125,11 @@ public class UserDtls {
 		this.isEnable = isEnable;
 	}
 
-	public Boolean getAccountNonLocked() {
+	public boolean getAccountNonLocked() {
 		return accountNonLocked;
 	}
 
-	public void setAccountNonLocked(Boolean accountNonLocked) {
+	public void setAccountNonLocked(boolean accountNonLocked) {
 		this.accountNonLocked = accountNonLocked;
 	}
 

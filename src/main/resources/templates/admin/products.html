@@ -8,23 +8,38 @@
 <body>
 	<section>
 		<div class="container-fluid mt-5 p-2">
-
-			<div class="card card-sh">
-				<div class="card-header text-center">
-					<p class="fs-4">View Product</p>
+			<div class="row">
+				<p class="text-center fs-3">All order</p>
+				<hr>
+				<a href="/admin/" class="text-decoration-none"><i
+					class="fa-solid fa-arrow-left"></i> Back</a>
+				<div class="text-center">
 					<th:block th:if="${session.successMsg}">
-						<p class="fw-bold text-success">[[${session.successMsg}]]</p>
-						<th:block th:text="${@commonServiceImpl.removeSession()}"></th:block>
+						<p class="fs-5 text-center text-success">[[${session.successMsg}]]</p>
+						<th:block th:if="${@commonServiceImpl.removeSession()}"></th:block>
 					</th:block>
-					<th:block th:if="${session.errorMsg}">
-						<p class="fw-bold text-danger">[[${session.errorMssg}]]</p>
-						<th:block th:text="${@commonServiceImpl.removeSession()}"></th:block>
-					</th:block>
-				</div>
 
-				<div class="card-body text-center">
-					<table class="table">
-						<thead>
+					<th:block th:if="${session.errorMsg}">
+						<p class="fs-5 text-center text-danger">[[${session.errorMsg}]]</p>
+						<th:block th:if="${@commonServiceImpl.removeSession()}"></th:block>
+					</th:block>
+
+				</div>
+				<div class="col-md-4 p-2">
+					<form action="/admin/products" method="get">
+						<div class="row">
+							<div class="col">
+								<input type="text" class="form-control" name="ch">
+							</div>
+							<div class="col">
+								<button class="btn btn-primary">Search</button>
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class=" card   text-center p-3">
+					<table class="table table-bordered">
+						<thead class="table-light table-dark">
 							<tr>
 								<th scope="col">S.no</th>
 								<th scope="col">Image</th>
@@ -50,20 +65,48 @@
 								<td>[[${p.discountPrice}]]</td>
 								<td>[[${p.isActive}]]</td>
 								<td>[[${p.stock}]]</td>
-								<td>
-								<a th:href="@{'/admin/editProduct/'+${p.id}}" class="btn btn-primary btn-sm"><i class="fa-solid fa-pen-to-square  fa-1x"></i>Edit</a> 
-										
-								<a th:href="@{'/admin/deleteProduct/'+${p.id}}" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash fa-1x"></i>Delete</a>
-									
-							   </td>
+								<td><a th:href="@{'/admin/editProduct/'+${p.id}}"
+									class="btn btn-primary btn-sm"><i
+										class="fa-solid fa-pen-to-square  fa-1x"></i>Edit</a> <a
+									th:href="@{'/admin/deleteProduct/'+${p.id}}"
+									class="btn btn-danger btn-sm"><i
+										class="fa-solid fa-trash fa-1x"></i>Delete</a></td>
 							</tr>
 						</tbody>
 					</table>
 
 				</div>
 
+				<div class="row mt-3">
+					<div class="col-md-3">
+						<p>Total Products : [[${totalElements}]]</p>
+					</div>
+					<div class="col-md-6 offset-1">
+						<nav aria-label="Page navigation example">
+							<ul class="pagination">
+								<li class="page-item" th:classappend="${isFirst==true}?'disabled':''">
+								<a class="page-link" th:href="@{'/admin/products?pageNo='+${pageNo-1}}"
+									aria-label="Previous"> <span aria-hidden="true">&laquo;</span>
+								</a>
+								</li>
+								<li th:each="i:${#numbers.sequence(1,totalPages)}" class="page-item" th:classappend="${i==pageNo+1}?'active':''">
+								<a class="page-link" th:href="@{'/admin/products?pageNo='+${i-1}}">[[${i}]]</a>
+								</li>
+								
+								<li class="page-item" th:classappend="${isLast==true}?'disabled':''"><a class="page-link" th:href="@{'/admin/products?pageNo='+${pageNo+1}}"
+									aria-label="Next"> <span aria-hidden="true">&raquo;</span>
+								</a></li>
+							</ul>
+						</nav>
+
+					</div>
+
+
+				</div>
+
 			</div>
 		</div>
+
 
 
 	</section>

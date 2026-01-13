@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	th:replace="~{base::Layout(~{::section})}">
+<head>
+<meta charset="UTF-8">
+<title>Order Place</title>
+</head>
+<body>
+
+	<section>
+
+		<div class="container-fluid mt-2 p-5">
+			<div class="row">
+
+				<p class="text-center fs-3">All order</p>
+				<a href="/admin/" class="text-decoration-none"><i
+					class="fa-solid fa-arrow-left"></i> Back</a>
+				<div class="text-center">
+					<th:block th:if="${session.successMsg}">
+						<p class="fs-5 text-center text-success">[[${session.successMsg}]]</p>
+						<th:block th:if="${@commonServiceImpl.removeSession()}"></th:block>
+					</th:block>
+
+					<th:block th:if="${session.errorMsg}">
+						<p class="fs-5 text-center text-danger">[[${session.errorMsg}]]</p>
+						<th:block th:if="${@commonServiceImpl.removeSession()}"></th:block>
+					</th:block>
+
+				</div>
+				<div class="col-md-4 p-3">
+					<form action="/admin/search-order" method="post">
+						<div class="row">
+							<div class="col">
+								<input type="text" class="form-control" name="orderId"
+									placeholder="Enter order Id">
+							</div>
+							<div class="col">
+								<button class="btn btn-primary">Search</button>
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class="col-md-12">
+
+					<div class="card"></div>
+					<table class="table table-bordered">
+						<thead class="table-light">
+							<tr>
+								<th scope="col">Order Id</th>
+								<th scope="col">Deliver Details</th>
+								<th scope="col">Date</th>
+								<th scope="col">Product Details</th>
+								<th scope="col">Price</th>
+								<th scope="col">Status</th>
+								<th scope="col">Action</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="o:${orders}">
+								<th scope="row">[[${o.orderId}]]</th>
+								<td>Name : [[${o.address.firstName+ '
+									'+o.address.lastName}]] <br> Mobno :
+									[[${o.address.mobileNo}]] <br> Address :
+									[[${o.address.address}]] <br> City & State :
+									[[${o.address.city+' '+o.address.state}]] <br> pincode :
+									[[${o.address.pincode}]]
+
+
+								</td>
+								<td>[[${o.orderDate}]]</td>
+								<td>[[${o.product.title}]]</td>
+								<td>Quantity: [[${o.quantity}]] <br> Price:
+									[[${o.product.discountPrice}]] <br> Total Price :
+									[[${o.price}]]
+								</td>
+								<td>[[${o.orderStatus}]]</td>
+								<td>
+									<form action="/admin/update-order-status" method="post">
+										<div class="row">
+											<div class="col">
+												<select class="form-control" name="st">
+													<option>-----Select-----</option>
+													<option value="1">In progress</option>
+													<option value="2">Order received</option>
+													<option value="3">Product packed</option>
+													<option value="4">Out for delivery</option>
+													<option value="5">Delivered</option>
+													<option value="6">Cancelled</option>
+
+												</select>
+											</div>
+											<input type="hidden" name="id" th:value="${o.id}">
+											<div class="col">
+												<th:block
+													th:if="${o.orderStatus=='Cancelled' || o.orderStatus=='Delivered'}">
+													<button class="btn btn-primary btn-sm disabled">Update</button>
+												</th:block>
+												<th:block
+													th:unless="${o.orderStatus=='Cancelled' || o.orderStatus=='Delivered'}">
+													<button class="btn btn-primary btn-sm ">Update</button>
+												</th:block>
+											</div>
+										</div>
+									</form>
+								</td>
+
+
+							</tr>
+
+						</tbody>
+					</table>
+				</div>
+			</div>
+           <div th:if="${pageNo!=null or pageNo>0}">
+			<div class="row">
+				<div class="col-md-3 mr-3">Total Orders : [[${totalElement}]]</div>
+				<div class="col-md-6 offset-md-1">
+					<nav aria-label="Page navigation example">
+						<ul class="pagination">
+							<li class="page-item"
+								th:classappend="${isFirst==true}?'disabled':'' "><a class="
+								page-link"  th:href="@{'/admin/orders?pageNo=' + ${pageNo-1}}" aria-label="Previous"><span
+								aria-hidden="true">&laquo;</span> </a></li>
+							<li th:each="i:${#numbers.sequence(1,totalPages)}" class="page-item" th:classappend="${pageNo+1==i}?'active':'' "><a class="page-link" 
+							th:href="@{'/admin/orders?pageNo='+${i-1}}">[[${i}]]</a></li>
+							<li class="page-item"
+								th:classappend="${isLast==true}?'disabled':'' "><a class="
+								page-link" th:href="@{'/admin/orders?pageNo='+ ${pageNo+1}}" aria-label="Next"><span
+								aria-hidden="true">&raquo;</span> </a></li>
+						</ul>
+					</nav>
+
+				</div>
+			</div>
+          </div>
+		</div>
+	</section>
+</body>
+</html>

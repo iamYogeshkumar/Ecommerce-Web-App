@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	th:replace="~{base::Layout(~{::section})}">
+<head>
+<meta charset="UTF-8">
+<title>Order Place</title>
+</head>
+<body>
+
+	<section>
+
+		<div class="container mt-5 p-5">
+			<div class="row">
+
+				<p class="text-center fs-3">My order</p>
+				<div class="text-center">
+					<th:block th:if="${session.successMsg}">
+						<p class="fs-5 text-center text-success">[[${session.successMsg}]]</p>
+						<th:block th:if="${@commonServiceImpl.removeSession()}"></th:block>
+					</th:block>
+
+					<th:block th:if="${session.errorMsg}">
+						<p class="fs-5 text-center text-danger">[[${session.errorMsg}]]</p>
+						<th:block th:if="${@commonServiceImpl.removeSession()}"></th:block>
+					</th:block>
+
+				</div>
+				<div class="col-md-12">
+					<div class="card"></div>
+					<table class="table table-bordered">
+						<thead>
+							<tr>
+								<th scope="col">Order Id</th>
+								<th scope="col">Date</th>
+								<th scope="col">Product Details</th>
+								<th scope="col">Price</th>
+								<th scope="col">Status</th>
+								<th scope="col">Action</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="o:${orders}">
+								<th scope="row">[[${o.orderId}]]</th>
+								<td>[[${o.orderDate}]]</td>
+								<td>[[${o.product.title}]]</td>
+								<td>Quantity: [[${o.quantity}]] <br> Price:
+									[[${o.product.discountPrice}]] <br> Total Price :
+									[[${o.price}]]
+								</td>
+								<td>[[${o.orderStatus}]]</td>
+								<td>
+								   <th:block
+										th:if="${o.orderStatus!='Cancelled'}">
+										<a th:href="@{'/user/update-status?id=' + ${o.id} + '&st=6'}"
+											class="btn btn-danger btn-sm">cancel</a>
+
+									</th:block>
+									 <th:block
+										th:unless="${o.orderStatus!='Cancelled'}">
+										<a href="#" 
+											class="btn btn-danger btn-sm disabled">cancel</a>
+
+									</th:block>
+									</td>
+
+
+							</tr>
+
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+		</div>
+	</section>
+</body>
+</html>

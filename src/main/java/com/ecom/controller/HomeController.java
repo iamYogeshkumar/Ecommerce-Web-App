@@ -7,12 +7,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.Principal;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties.Sort;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.ObjectUtils;
@@ -23,7 +25,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.ecom.model.Cart;
 import com.ecom.model.Category;
 import com.ecom.model.Product;
 import com.ecom.model.UserDtls;
@@ -33,6 +34,7 @@ import com.ecom.service.ProductService;
 import com.ecom.service.UserService;
 import com.ecom.util.CommonUtil;
 
+import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
@@ -50,12 +52,38 @@ public class HomeController {
 
 	@Autowired
 	private CommonUtil commonUtil;
-	
+
 	@Autowired
 	private CartService cartService;
 
 	@GetMapping("/")
-	public String index() {
+	public String index(Model m) {
+		List<Category> list = categiryService.getAllActiveCategory();
+		List<Product> products = null;
+		
+		List<Product> activeProducts = productService.getAllActiveProducts();
+		
+		if(activeProducts!=null) {
+			if(activeProducts.size()<6) {
+				products=activeProducts;
+			}else {
+				products=activeProducts.stream().sorted(Comparator.comparing(Product::getId).reversed()).limit(8).toList(); 
+
+			}
+
+		}
+		
+		if(!ObjectUtils.isEmpty(list)) {
+			if(list.size()<6) {
+				m.addAttribute("categories", list);
+			}
+			else {
+				list=categiryService.getAllActiveCategory().stream().limit(6).toList();
+			}
+          
+		}
+		m.addAttribute("categories", list);
+		m.addAttribute("products", products);
 		return "index";
 	}
 
@@ -75,7 +103,7 @@ public class HomeController {
 		if (!ObjectUtils.isEmpty(p)) {
 			String email = p.getName();
 			UserDtls user = userService.getUserByEmail(email);
-			 m.addAttribute("countCart",cartService.getCountcart(user.getId()));
+			m.addAttribute("countCart", cartService.getCountcart(user.getId()));
 			m.addAttribute("user", user);
 		}
 		m.addAttribute("category", categiryService.getAllActiveCategory());
@@ -83,20 +111,48 @@ public class HomeController {
 	}
 
 	@GetMapping("/products")
-	public String products(Model m, @RequestParam(value = "category", defaultValue = "") String category) {
+	public String products(Model m, @RequestParam(value = "category", defaultValue = "") String category,
+			@RequestParam(name = "pageNo", defaultValue = "0") Integer pageNo,
+			@RequestParam(name = "pageSize", defaultValue = "8") Integer pageSize,
+			@RequestParam(name = "ch", defaultValue = "") String ch) {
 		List<Category> categories = categiryService.getAllActiveCategory();
-		List<Product> products = productService.getAllActiveProducts();
-
-		if (category.equals("")) {
-			m.addAttribute("products", products);
-			m.addAttribute("categories", categories);
-		} else {
-			List<Product> filterProduct = products.stream().filter(i -> i.getCategory().equals(category))
-					.collect(Collectors.toList());
-			m.addAttribute("products", filterProduct);
-			m.addAttribute("categories", categories);
-		}
+		m.addAttribute("categories", categories);
 		m.addAttribute("paramValue", category);
+
+		Page<Product> page = null;
+		if (StringUtils.isEmpty(ch)) {
+			page = productService.getAllActiveProductPagination(pageNo, pageSize, category);
+		} else {
+			page = productService.searchAllActiveProductPagination(pageNo, pageSize, category, ch);
+		}
+
+		// Collections.sort(products,(i,j)->i.getTitle().compareTo(j.getTitle()));
+		/*
+		 * if (category.equals("")) { m.addAttribute("products", products);
+		 * m.addAttribute("categories", categories); } else { List<Product>
+		 * filterProduct = products.stream().filter(i ->
+		 * i.getCategory().equals(category)) .collect(Collectors.toList());
+		 * m.addAttribute("products", filterProduct); m.addAttribute("categories",
+		 * categories); }
+		 */
+
+		/*
+		 * System.out.println("Page No : "+page.getNumber());
+		 * System.out.println("PageSize : "+page.getSize());
+		 * System.out.println("totalPages : "+page.getTotalPages());
+		 * System.out.println("totalElements :"+page.getTotalElements());
+		 * System.out.println("isFrist : "+ page.isFirst());
+		 */
+
+		m.addAttribute("products", page.getContent());
+		m.addAttribute("productsSize", page.getContent().size());
+		m.addAttribute("pageNo", page.getNumber());
+		m.addAttribute("pageSize", pageSize);
+		m.addAttribute("totalElement", page.getTotalElements());
+		m.addAttribute("totalPages", page.getTotalPages());
+		m.addAttribute("isFirst", page.isFirst());
+		m.addAttribute("isLast", page.isLast());
+
 		return "product";
 	}
 
@@ -156,27 +212,27 @@ public class HomeController {
 	}
 
 	// reset pwd
-	@GetMapping("/reset-password")  //url is in string format
-	public String showresetPassword(@RequestParam String token,Model m) {
+	@GetMapping("/reset-password") // url is in string format
+	public String showresetPassword(@RequestParam String token, Model m) {
 		UserDtls user = userService.getUserByToken(token);
 		if (!ObjectUtils.isEmpty(user)) {
 			m.addAttribute("token", token);
 		} else {
-			//session.setAttribute("errorMsg", "Your link is expired");
-			m.addAttribute("msg","Your link is expired or invalid");
+			// session.setAttribute("errorMsg", "Your link is expired");
+			m.addAttribute("msg", "Your link is expired or invalid");
 			return "message";
 		}
 		return "reset_password";
 	}
-	
+
 	@PostMapping("/reset-password")
-	public String resetPassword(@RequestParam String token,@RequestParam String password,Model m) {
+	public String resetPassword(@RequestParam String token, @RequestParam String password, Model m) {
 		UserDtls user = userService.getUserByToken(token);
-		System.out.println("THE TOKEN : "+token);
-		if(user==null) {
-			m.addAttribute("msg","Your link is expired or invalid");
+		System.out.println("THE TOKEN : " + token);
+		if (user == null) {
+			m.addAttribute("msg", "Your link is expired or invalid");
 			return "message";
-		}else {
+		} else {
 			userService.updateUserPwd(token, password);
 			m.addAttribute("msg", "Your password Changed successfully");
 		}
@@ -205,6 +261,15 @@ public class HomeController {
 
 		}
 		return "redirect:/forget-password";
+	}
+
+	@GetMapping("/search")
+	public String searchProduct(@RequestParam String ch, Model m) {
+		List<Product> searchProduct = productService.searchProduct(ch);
+		m.addAttribute("products", searchProduct);
+		m.addAttribute("productsSize", searchProduct.size());
+		m.addAttribute("categories", categiryService.getAllActiveCategory());
+		return "product";
 	}
 
 }

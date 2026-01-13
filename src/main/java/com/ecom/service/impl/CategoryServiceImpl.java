@@ -3,6 +3,8 @@ package com.ecom.service.impl;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -24,10 +26,16 @@ public class CategoryServiceImpl implements CategoryService {
 		}
 		return null;
 	}
+	
+	public List<Category> getAllCategory(){
+		return repo.findAll();
+	}
 
 	@Override
-	public List<Category> getAllCategory() {
-		return repo.findAll();
+	public Page<Category> getAllCategoryPagination(Integer pageNo,Integer pageSize) {
+		PageRequest of = PageRequest.of(pageNo, pageSize);
+		
+		return repo.findAll(of);
 	}
 
 	@Override

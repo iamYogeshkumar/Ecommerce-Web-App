@@ -38,11 +38,11 @@ public class Category {
 		this.imageName = imageName;
 	}
 
-	public Boolean getIsActive() {
+	public boolean getIsActive() {
 		return isActive;
 	}
 
-	public void setIsActive(Boolean isActive) {
+	public void setIsActive(boolean isActive) {
 		this.isActive = isActive;
 	}
 	
